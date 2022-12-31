@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
 import Board from "./Board";
+import History from "./History";
 
 function Game() {
-  const [squares, setSquares] = useState(Array(9).fill(null));
+  const [listOfSquares, setListOfSquares] = useState([Array(9).fill(null)]);
+  const [step, setStep] = useState(0);
   const [xIsNext, setXIsNext] = useState(true);
   const [winner, setWinner] = useState(null);
 
   //Declaring a Winner
   useEffect(() => {
-    setWinner(calculateWinner(squares));
-  }, [squares]);
+    const currentSquare = listOfSquares[step];
+    setWinner(calculateWinner(currentSquare));
+  }, [step, listOfSquares]);
 
   //function to check if a player has won.
   //If a player has won, we can display text such as “Winner: X” or “Winner: O”.
@@ -40,17 +43,29 @@ function Game() {
 
   //Handle player
   const handleClick = (i) => {
-    const newSquares = squares.slice();
-    if (newSquares[i] !== null) return;
+    const currentSquare = listOfSquares[step];
+    const newListOfSquares = listOfSquares;
+    const newSquares = currentSquare.slice();
+
+    if (newSquares[i] || winner !== null) return;
     newSquares[i] = xIsNext ? "X" : "0";
+    newListOfSquares.push(newSquares);
+
+    setListOfSquares(newListOfSquares);
+    setStep(newListOfSquares.length - 1);
     setXIsNext((xIsNext) => !xIsNext);
-    setSquares(newSquares);
   };
 
   //Restart game
   const handleRestart = () => {
-    setSquares(Array(9).fill(null));
+    setListOfSquares([Array(9).fill(null)]);
+    setStep(0);
     setXIsNext(true);
+  };
+
+  const goToStep = (step) => {
+    setStep(step);
+    setXIsNext(step % 2 === 0);
   };
 
   return (
@@ -58,8 +73,9 @@ function Game() {
       <h2 className="result">Winner is: {winner ? winner : "N/N"}</h2>
       <div className="game">
         <span className="player">Next player is: {xIsNext ? "X" : "O"}</span>
-        <Board squares={squares} handleClick={handleClick} />
+        <Board squares={listOfSquares[step]} handleClick={handleClick} />
       </div>
+      <History listOfSquares={listOfSquares} goToStep={goToStep}></History>
       <button onClick={handleRestart} className="restart-btn">
         Restart
       </button>
