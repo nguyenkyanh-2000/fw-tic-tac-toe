@@ -64,6 +64,8 @@ function Game() {
   };
 
   const goToStep = (step) => {
+    const newListOfSquares = listOfSquares.slice(0, step + 1);
+    setListOfSquares(newListOfSquares);
     setStep(step);
     setXIsNext(step % 2 === 0);
   };
